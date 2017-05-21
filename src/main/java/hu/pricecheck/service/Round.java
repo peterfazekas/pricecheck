@@ -13,12 +13,12 @@ public class Round {
     private final int scale;
     private final RoundingMode roundMode;
 
-    public Round(int scale, RoundingMode roundMode) {
+    public Round(final int scale, final RoundingMode roundMode) {
         this.scale = scale;
         this.roundMode = roundMode;
     }
 
     public BigDecimal round(final BigDecimal value) {
-        return value.setScale(scale, RoundingMode.HALF_UP);
+        return value.setScale(scale, roundMode);
     }
 }

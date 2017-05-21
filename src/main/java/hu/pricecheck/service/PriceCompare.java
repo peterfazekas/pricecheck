@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class PriceCompare {
 
-    private static final List<RoundingMode> ROUNDING_MODES = Arrays.asList(RoundingMode.CEILING, RoundingMode.UP, RoundingMode.HALF_UP, RoundingMode.HALF_EVEN, RoundingMode.HALF_DOWN, RoundingMode.DOWN, RoundingMode.FLOOR, RoundingMode.UNNECESSARY);
+    private static final List<RoundingMode> ROUNDING_MODES = Arrays.asList(RoundingMode.CEILING, RoundingMode.UP, RoundingMode.HALF_UP, RoundingMode.HALF_EVEN, RoundingMode.HALF_DOWN, RoundingMode.DOWN, RoundingMode.FLOOR);
     private final Exchange exchange;
     private final Price baseRoomPrice;
     private final String separator;
@@ -57,7 +57,7 @@ public class PriceCompare {
             lines[row++].append("Lis Prices:" + separator + lis.printValue() + separator);
             lisPrice = lis.getRoundedValue();
         }
-        lines[row++].append("Difference:" + separator + bravosPrice.subtract(lisPrice) + separator + separator + separator);
+        lines[row++].append("Difference:" + separator + bravosPrice.subtract(lisPrice).abs() + separator + separator + separator);
     }
 
     private StringBuilder[] getStringBuilders() {
