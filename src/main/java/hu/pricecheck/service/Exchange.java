@@ -5,7 +5,6 @@ import hu.pricecheck.model.Price;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,12 +19,15 @@ public class Exchange {
     private final BigDecimal lisToUsdRate;
     private final BigDecimal lisFromUsdRate;
     private final List<String> currencies;
+    private final String separator;
 
-    public Exchange(final BigDecimal bravosRate, final BigDecimal lisToUsdRate, final BigDecimal lisFromUsdRate, final List<String> currencies) {
+    public Exchange(final BigDecimal bravosRate, final BigDecimal lisToUsdRate, final BigDecimal lisFromUsdRate,
+                    final List<String> currencies, final String separator) {
         this.bravosRate = bravosRate;
         this.lisToUsdRate = lisToUsdRate;
         this.lisFromUsdRate = lisFromUsdRate;
         this.currencies = currencies;
+        this.separator = separator;
     }
 
     public BigDecimal compareRates() {
@@ -35,18 +37,16 @@ public class Exchange {
 
     public List<Price> bravosExchange(final Price origin) {
         BigDecimal priceValue = origin.getValue().multiply(bravosRate, MATH_CONTEXT);
-        return Arrays.asList(origin, new Price(priceValue, currencies.get(1)));
+        return Arrays.asList(origin, new Price(priceValue, currencies.get(1), separator));
     }
 
     public List<Price> lisExchange(final Price origin, final Round round) {
         BigDecimal usdValue = origin.getValue().divide(lisToUsdRate, MATH_CONTEXT);
         BigDecimal roundedValue = round == null ? usdValue : round.round(usdValue);
         BigDecimal displayValue = lisFromUsdRate.multiply(roundedValue, MATH_CONTEXT);
-        return Arrays.asList(origin, new Price(usdValue, USD), new Price(roundedValue, USD), new Price(displayValue, currencies.get(1)));
+        return Arrays.asList(origin, new Price(usdValue, USD, separator), new Price(roundedValue, USD, separator),
+                new Price(displayValue, currencies.get(1), separator));
     }
-
-
-
 
 
 }

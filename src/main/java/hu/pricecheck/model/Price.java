@@ -13,10 +13,12 @@ public class Price {
     private final BigDecimal value;
     private final String currency;
     private final Round round;
+    private final String separator;
 
-    public Price(final BigDecimal value, final String currency) {
+    public Price(final BigDecimal value, final String currency, final String separator) {
         this.value = value;
         this.currency = currency;
+        this.separator = separator;
         round = new Round(2, RoundingMode.HALF_UP);
     }
 
@@ -29,7 +31,9 @@ public class Price {
     }
 
     public String printValue() {
-        return getValue().toString() + "," + currency + "," + getRoundedValue().toString() + "," + currency;
+        String actualSeparator = separator.isEmpty() ? "," : separator;
+        return getValue().toString() + actualSeparator + currency + actualSeparator
+               + getRoundedValue().toString() + actualSeparator + currency;
     }
 
 }
