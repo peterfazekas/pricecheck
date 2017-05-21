@@ -3,6 +3,7 @@ package hu.pricecheck.service;
 import hu.pricecheck.model.Price;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.List;
@@ -13,12 +14,21 @@ import java.util.List;
 public class PriceCompare {
 
     private static final List<RoundingMode> ROUNDING_MODES = Arrays.asList(RoundingMode.CEILING, RoundingMode.UP, RoundingMode.HALF_UP, RoundingMode.HALF_EVEN, RoundingMode.HALF_DOWN, RoundingMode.DOWN, RoundingMode.FLOOR);
-    private final Exchange exchange;
+    private static final int PRECISION = 16;
+    private final BigDecimal bravosRate;
+    private final BigDecimal lisToUsdRate;
+    private final BigDecimal lisFromUsdRate;
+    private final List<String> currencies;
     private final Price baseRoomPrice;
+    private Exchange exchange;
     private final String separator;
 
-    public PriceCompare(final Exchange exchange, final Price baseRoomPrice, final String separator) {
-        this.exchange = exchange;
+    public PriceCompare(final BigDecimal bravosRate, final BigDecimal lisToUsdRate, final BigDecimal lisFromUsdRate,
+                        final List<String> currencies, final Price baseRoomPrice, final String separator) {
+        this.bravosRate= bravosRate;
+        this.lisToUsdRate = lisToUsdRate;
+        this.lisFromUsdRate = lisFromUsdRate;
+        this.currencies = currencies;
         this.baseRoomPrice = baseRoomPrice;
         this.separator = separator;
     }
@@ -35,6 +45,8 @@ public class PriceCompare {
     }
 
     private void getHeaderInfo() {
+        MathContext mathContext = new MathContext(PRECISION, RoundingMode.HALF_UP);
+        exchange = new Exchange(bravosRate, lisToUsdRate, lisFromUsdRate, mathContext, currencies, separator);
         Round round = new Round(2, RoundingMode.HALF_UP);
         System.out.print("Native Difference:" + separator + exchange.compareRates());
         System.out.println(",Rounded Difference:" + separator + round.round(exchange.compareRates()));
@@ -43,6 +55,8 @@ public class PriceCompare {
 
     private void getPriceCompare(StringBuilder[] lines, RoundingMode mode, int scale) {
         Round round = new Round(scale, mode);
+        MathContext mathContext = new MathContext(PRECISION, mode);
+        exchange = new Exchange(bravosRate, lisToUsdRate, lisFromUsdRate, mathContext, currencies, separator);
         List<Price> bravosPrices = exchange.bravosExchange(baseRoomPrice);
         List<Price> lisPrices = exchange.lisExchange(baseRoomPrice, round);
         BigDecimal bravosPrice = null;

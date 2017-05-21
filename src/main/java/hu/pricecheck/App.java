@@ -16,23 +16,21 @@ import java.util.List;
  */
 public class App {
 
-    private static final MathContext MATH_CONTEXT = new MathContext(8, RoundingMode.HALF_UP);
     private static final BigDecimal BRAVOS_RATE = BigDecimal.valueOf(309970798, 6);
     private static final BigDecimal LIS_TO_USD_RATE = BigDecimal.valueOf(900630, 6);
     private static final BigDecimal LIS_FROM_USD_RATE = BigDecimal.valueOf(279169000, 6);
+    private static final BigDecimal ROOM_PRICE = BigDecimal.valueOf(33);
     private static final List<String> CURRENCIES = Arrays.asList("EUR", "HUF");
     private static final String OUTPUT = "pricecompare.csv";
     private static final String SEPARATOR = ",";
 
-    private final Exchange exchange;
     private final Price baseRoomPrice;
     private final PriceCompare priceCompare;
     private final FileLogger log;
 
     public App() {
-        exchange = new Exchange(BRAVOS_RATE, LIS_TO_USD_RATE, LIS_FROM_USD_RATE, MATH_CONTEXT, CURRENCIES, SEPARATOR);
-        baseRoomPrice = new Price(BigDecimal.valueOf(33), CURRENCIES.get(0), SEPARATOR);
-        priceCompare = new PriceCompare(exchange, baseRoomPrice, SEPARATOR);
+        baseRoomPrice = new Price(ROOM_PRICE, CURRENCIES.get(0), SEPARATOR);
+        priceCompare = new PriceCompare(BRAVOS_RATE, LIS_TO_USD_RATE, LIS_FROM_USD_RATE, CURRENCIES, baseRoomPrice, SEPARATOR);
         log = new FileLogger(OUTPUT);
     }
 
