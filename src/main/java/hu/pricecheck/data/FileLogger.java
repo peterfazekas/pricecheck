@@ -9,16 +9,16 @@ import java.io.PrintWriter;
  */
 public class FileLogger {
 
-    private static final String PATH = "src\\main\\resources\\" ;
+    private static final String PATH = "src\\main\\resources\\";
 
-    private final String fileName ;
+    private final String fileName;
 
     public FileLogger(final String fileName) {
         this.fileName = PATH + fileName;
     }
 
     public void println(final String line) {
-        try (PrintWriter log = new PrintWriter(new FileWriter(fileName))){
+        try (PrintWriter log = new PrintWriter(new FileWriter(fileName))) {
             log.println(line);
             System.out.println(line);
         } catch (IOException e) {

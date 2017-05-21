@@ -1,5 +1,6 @@
 package hu.pricecheck.service;
 
+import hu.pricecheck.App;
 import hu.pricecheck.model.Price;
 
 import java.math.BigDecimal;
@@ -13,24 +14,14 @@ import java.util.List;
  */
 public class PriceCompare {
 
+    private static final String SEPARATOR = App.SEPARATOR;
     private static final List<RoundingMode> ROUNDING_MODES = Arrays.asList(RoundingMode.CEILING, RoundingMode.UP, RoundingMode.HALF_UP, RoundingMode.HALF_EVEN, RoundingMode.HALF_DOWN, RoundingMode.DOWN, RoundingMode.FLOOR);
-    private static final int PRECISION = 16;
-    private final BigDecimal bravosRate;
-    private final BigDecimal lisToUsdRate;
-    private final BigDecimal lisFromUsdRate;
-    private final List<String> currencies;
+    private static final int PRECISION = App.PRECISION;
     private final Price baseRoomPrice;
     private Exchange exchange;
-    private final String separator;
 
-    public PriceCompare(final BigDecimal bravosRate, final BigDecimal lisToUsdRate, final BigDecimal lisFromUsdRate,
-                        final List<String> currencies, final Price baseRoomPrice, final String separator) {
-        this.bravosRate= bravosRate;
-        this.lisToUsdRate = lisToUsdRate;
-        this.lisFromUsdRate = lisFromUsdRate;
-        this.currencies = currencies;
+    public PriceCompare(final Price baseRoomPrice) {
         this.baseRoomPrice = baseRoomPrice;
-        this.separator = separator;
     }
 
     public StringBuilder[] getData() {
@@ -46,32 +37,32 @@ public class PriceCompare {
 
     private void getHeaderInfo() {
         MathContext mathContext = new MathContext(PRECISION, RoundingMode.HALF_UP);
-        exchange = new Exchange(bravosRate, lisToUsdRate, lisFromUsdRate, mathContext, currencies, separator);
+        exchange = new Exchange(mathContext);
         Round round = new Round(2, RoundingMode.HALF_UP);
-        System.out.print("Native Difference:" + separator + exchange.compareRates());
-        System.out.println(",Rounded Difference:" + separator + round.round(exchange.compareRates()));
-        System.out.println("Room Price:" + separator + baseRoomPrice.printValue());
+        System.out.print("Native Difference:" + SEPARATOR + exchange.compareRates());
+        System.out.println(",Rounded Difference:" + SEPARATOR + round.round(exchange.compareRates()));
+        System.out.println("Room Price:" + SEPARATOR + printPriceValue(baseRoomPrice));
     }
 
     private void getPriceCompare(StringBuilder[] lines, RoundingMode mode, int scale) {
         Round round = new Round(scale, mode);
         MathContext mathContext = new MathContext(PRECISION, mode);
-        exchange = new Exchange(bravosRate, lisToUsdRate, lisFromUsdRate, mathContext, currencies, separator);
+        exchange = new Exchange(mathContext);
         List<Price> bravosPrices = exchange.bravosExchange(baseRoomPrice);
         List<Price> lisPrices = exchange.lisExchange(baseRoomPrice, round);
         BigDecimal bravosPrice = null;
         BigDecimal lisPrice = null;
         int row = 0;
-        lines[row++].append("Scale:" + separator + scale + separator + " Rounding Mode:" + separator + mode + separator);
+        lines[row++].append("Scale:" + SEPARATOR + scale + SEPARATOR + " Rounding Mode:" + SEPARATOR + mode + SEPARATOR);
         for (Price bravos : bravosPrices) {
-            lines[row++].append("Bravos Prices:" + separator + bravos.printValue() + separator);
-            bravosPrice = bravos.getRoundedValue();
+            lines[row++].append("Bravos Prices:" + SEPARATOR + printPriceValue(bravos) + SEPARATOR);
+            bravosPrice = getRoundedValue(bravos.getValue());
         }
         for (Price lis : lisPrices) {
-            lines[row++].append("Lis Prices:" + separator + lis.printValue() + separator);
-            lisPrice = lis.getRoundedValue();
+            lines[row++].append("Lis Prices:" + SEPARATOR + printPriceValue(lis) + SEPARATOR);
+            lisPrice = getRoundedValue(lis.getValue());
         }
-        lines[row++].append("Difference:" + separator + bravosPrice.subtract(lisPrice).abs() + separator + separator + separator);
+        lines[row++].append("Difference:" + SEPARATOR + bravosPrice.subtract(lisPrice).abs() + SEPARATOR + SEPARATOR + SEPARATOR);
     }
 
     private StringBuilder[] getStringBuilders() {
@@ -81,4 +72,15 @@ public class PriceCompare {
         }
         return lines;
     }
+
+    public BigDecimal getRoundedValue(BigDecimal value) {
+        Round round = new Round(2, RoundingMode.HALF_UP);
+        return round.round(value);
+    }
+
+    public String printPriceValue(final Price price) {
+        return price.getValue().toString() + SEPARATOR + price.getCurrency() + SEPARATOR
+                + getRoundedValue(price.getValue()).toString() + SEPARATOR + price.getCurrency();
+    }
+
 }

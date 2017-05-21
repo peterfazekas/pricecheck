@@ -1,7 +1,5 @@
 package hu.pricecheck.service;
 
-import hu.pricecheck.model.Price;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
